@@ -143,11 +143,6 @@ public class VolumetricLight : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="renderer"></param>
-    /// <param name="viewProj"></param>
     private void SetupPointLight(VolumetricLightRenderer renderer, Matrix4x4 viewProj)
     {
         _commandBuffer.Clear();
@@ -215,23 +210,18 @@ public class VolumetricLight : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="renderer"></param>
-    /// <param name="viewProj"></param>
     private void SetupSpotLight(VolumetricLightRenderer renderer, Matrix4x4 viewProj)
     {
         _commandBuffer.Clear();
 
         int pass = 1;
-        if (!IsCameraInSpotLightBounds())
-        {
+        if (!IsCameraInSpotLightBounds()) //离相机太远或者角度很偏时
             pass = 3;
-        }
 
         Mesh mesh = VolumetricLightRenderer.GetSpotLightMesh();
 
+        //Spot mesh随着range变化缩放
+        //长度确定为_light.range 宽度由_light.spotAngle决定
         float scale = _light.range;
         float angleScale = Mathf.Tan((_light.spotAngle + 1) * 0.5f * Mathf.Deg2Rad) * _light.range;
 
@@ -240,6 +230,7 @@ public class VolumetricLight : MonoBehaviour
         Matrix4x4 view = Matrix4x4.TRS(_light.transform.position, _light.transform.rotation, Vector3.one).inverse;
 
         Matrix4x4 clip = Matrix4x4.TRS(new Vector3(0.5f, 0.5f, 0.0f), Quaternion.identity, new Vector3(-0.5f, -0.5f, 1.0f));
+        //圆形投影区aspect为1
         Matrix4x4 proj = Matrix4x4.Perspective(_light.spotAngle, 1, 0, 1);
 
         _material.SetMatrix("_MyLightMatrix0", clip * proj * view);
@@ -321,11 +312,6 @@ public class VolumetricLight : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="renderer"></param>
-    /// <param name="viewProj"></param>
     private void SetupDirectionalLight(VolumetricLightRenderer renderer, Matrix4x4 viewProj)
     {
         _commandBuffer.Clear();
@@ -394,10 +380,6 @@ public class VolumetricLight : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
     private bool IsCameraInPointLightBounds()
     {
         float distanceSqr = (_light.transform.position - Camera.current.transform.position).sqrMagnitude;
@@ -407,19 +389,15 @@ public class VolumetricLight : MonoBehaviour
         return false;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
     private bool IsCameraInSpotLightBounds()
     {
-        // check range
+        //cosβ* distance
         float distance = Vector3.Dot(_light.transform.forward, (Camera.current.transform.position - _light.transform.position));
         float extendedRange = _light.range + 1;
         if (distance > (extendedRange))
             return false;
 
-        // check angle
+        //Spot光源的角度需要除以一半才能用来界定角度边界
         float cosAngle = Vector3.Dot(transform.forward, (Camera.current.transform.position - _light.transform.position).normalized);
         if ((Mathf.Acos(cosAngle) * Mathf.Rad2Deg) > (_light.spotAngle + 3) * 0.5f)
             return false;
