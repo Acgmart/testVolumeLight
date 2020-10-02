@@ -305,6 +305,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c713e5210a7dff6469b22ab8be08d904, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  SampleCount: 8
+  ScatteringCoef: 0.5
+  ExtinctionCoef: 0.01
+  SkyboxExtinctionCoef: 0.9
+  MieG: 0.1
+  HeightFog: 0
+  HeightScale: 0.1
+  GroundLevel: 0
+  Noise: 0
+  NoiseScale: 0.015
+  NoiseIntensity: 1
+  NoiseIntensityOffset: 0.3
+  NoiseVelocity: {x: 3, y: 3}
+  MaxRayLength: 400
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -401,6 +415,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 472ff13cc9089a94c8e768cb7f0ba9bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Resolution: 1
+  DefaultSpotCookie: {fileID: 2800000, guid: 5157bf6d690b6df458f6c0ce0c06d329, type: 3}
 --- !u!1 &1435335754
 GameObject:
   m_ObjectHideFlags: 0
