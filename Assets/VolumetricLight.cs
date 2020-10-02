@@ -197,16 +197,14 @@ public class VolumetricLight : MonoBehaviour
 
             _commandBuffer.DrawMesh(mesh, world, _material, 0, pass);
 
-            if (CustomRenderEvent != null)
-                CustomRenderEvent(renderer, this, _commandBuffer, viewProj);
+            CustomRenderEvent?.Invoke(renderer, this, _commandBuffer, viewProj);
         }
         else
         {
             _material.DisableKeyword("SHADOWS_CUBE");
             renderer.GlobalCommandBuffer.DrawMesh(mesh, world, _material, 0, pass);
 
-            if (CustomRenderEvent != null)
-                CustomRenderEvent(renderer, this, renderer.GlobalCommandBuffer, viewProj);
+            CustomRenderEvent?.Invoke(renderer, this, renderer.GlobalCommandBuffer, viewProj);
         }
     }
 
@@ -299,16 +297,14 @@ public class VolumetricLight : MonoBehaviour
 
             _commandBuffer.DrawMesh(mesh, world, _material, 0, pass);
 
-            if (CustomRenderEvent != null)
-                CustomRenderEvent(renderer, this, _commandBuffer, viewProj);
+            CustomRenderEvent?.Invoke(renderer, this, _commandBuffer, viewProj);
         }
         else
         {
             _material.DisableKeyword("SHADOWS_DEPTH");
             renderer.GlobalCommandBuffer.DrawMesh(mesh, world, _material, 0, pass);
 
-            if (CustomRenderEvent != null)
-                CustomRenderEvent(renderer, this, renderer.GlobalCommandBuffer, viewProj);
+            CustomRenderEvent?.Invoke(renderer, this, renderer.GlobalCommandBuffer, viewProj);
         }
     }
 
@@ -367,16 +363,14 @@ public class VolumetricLight : MonoBehaviour
             _material.EnableKeyword("SHADOWS_DEPTH");
             _commandBuffer.Blit(nullTexture, renderer.GetVolumeLightBuffer(), _material, pass);
 
-            if (CustomRenderEvent != null)
-                CustomRenderEvent(renderer, this, _commandBuffer, viewProj);
+            CustomRenderEvent?.Invoke(renderer, this, _commandBuffer, viewProj);
         }
         else
         {
             _material.DisableKeyword("SHADOWS_DEPTH");
             renderer.GlobalCommandBuffer.Blit(nullTexture, renderer.GetVolumeLightBuffer(), _material, pass);
 
-            if (CustomRenderEvent != null)
-                CustomRenderEvent(renderer, this, renderer.GlobalCommandBuffer, viewProj);
+            CustomRenderEvent?.Invoke(renderer, this, renderer.GlobalCommandBuffer, viewProj);
         }
     }
 
