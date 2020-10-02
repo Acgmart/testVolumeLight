@@ -81,35 +81,21 @@ public class VolumetricLight : MonoBehaviour
         _material = new Material(shader); // new Material(VolumetricLightRenderer.GetLightMaterial());
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     void OnEnable()
     {
         VolumetricLightRenderer.PreRenderEvent += VolumetricLightRenderer_PreRenderEvent;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     void OnDisable()
     {
         VolumetricLightRenderer.PreRenderEvent -= VolumetricLightRenderer_PreRenderEvent;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public void OnDestroy()
     {
         Destroy(_material);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="renderer"></param>
-    /// <param name="viewProj"></param>
     private void VolumetricLightRenderer_PreRenderEvent(VolumetricLightRenderer renderer, Matrix4x4 viewProj)
     {
         // light was destroyed without deregistring, deregister now
@@ -130,18 +116,7 @@ public class VolumetricLight : MonoBehaviour
         _material.SetVector("_VolumetricLight", new Vector4(ScatteringCoef, ExtinctionCoef, _light.range, 1.0f - SkyboxExtinctionCoef));
 
         _material.SetTexture("_CameraDepthTexture", renderer.GetVolumeLightDepthBuffer());
-
-        //if (renderer.Resolution == VolumetricLightRenderer.VolumtericResolution.Full)
-        {
-            //_material.SetFloat("_ZTest", (int)UnityEngine.Rendering.CompareFunction.LessEqual);
-            //_material.DisableKeyword("MANUAL_ZTEST");            
-        }
-        //else
-        {
-            _material.SetFloat("_ZTest", (int)UnityEngine.Rendering.CompareFunction.Always);
-            // downsampled light buffer can't use native zbuffer for ztest, try to perform ztest in pixel shader to avoid ray marching for occulded geometry 
-            //_material.EnableKeyword("MANUAL_ZTEST");
-        }
+        _material.SetFloat("_ZTest", (int)UnityEngine.Rendering.CompareFunction.Always);
 
         if (HeightFog)
         {
