@@ -10,13 +10,9 @@ Shader "Hidden/BilateralBlur"
 		Cull Off ZWrite Off ZTest Always
 
 		CGINCLUDE
-        #define DOWNSAMPLE_DEPTH_MODE 2
-        #define UPSAMPLE_DEPTH_THRESHOLD 1.5f
         #define BLUR_DEPTH_FACTOR 0.5
         #define GAUSS_BLUR_DEVIATION 1.5        
         #define FULL_RES_BLUR_KERNEL_SIZE 7
-        #define HALF_RES_BLUR_KERNEL_SIZE 5
-        #define QUARTER_RES_BLUR_KERNEL_SIZE 6
         
 		#define PI 3.1415927f
 
