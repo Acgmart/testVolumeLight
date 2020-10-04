@@ -100,9 +100,9 @@ public class VolumetricLight : MonoBehaviour
 
         _commandBuffer.Clear();
 
-        int pass = 1;
+        int pass = 0;
         if (!IsCameraInSpotLightBounds()) //离相机太远或者角度很偏时
-            pass = 3;
+            pass = 1;
 
         Mesh mesh = VolumetricLightRenderer.GetSpotLightMesh();
 
