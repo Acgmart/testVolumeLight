@@ -12,10 +12,6 @@ Shader "Sandbox/VolumetricLight"
 		LOD 100
 
 		CGINCLUDE
-
-		#if defined(SHADOWS_DEPTH) || defined(SHADOWS_CUBE)
-		#define SHADOWS_NATIVE
-		#endif
 		
 		#include "UnityCG.cginc"
 		#include "UnityDeferredLibrary.cginc"
@@ -206,36 +202,28 @@ Shader "Sandbox/VolumetricLight"
 		}
 
 		ENDCG
-		// pass 1 - spot light, camera inside
+
+		// pass 0 - spot light, camera inside
 		Pass
 		{
-			ZTest Off
-			Cull Front
-			ZWrite Off
-			Blend One One
+			ZTest Off Cull Front ZWrite Off Blend One One
 
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment fragPointInside
 			#pragma target 4.0
 
-			#define UNITY_HDR_ON
-
 			#pragma shader_feature HEIGHT_FOG
 			#pragma shader_feature NOISE
 			#pragma shader_feature SHADOWS_DEPTH
 			#pragma shader_feature SPOT
 
-			#ifdef SHADOWS_DEPTH
-			#define SHADOWS_NATIVE
-			#endif
-
 			fixed4 fragPointInside(v2f i) : SV_Target
 			{
 				float2 uv = i.uv.xy / i.uv.w;
 
-				// read depth and reconstruct world position
 				float depth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, uv);
+				float linearDepth = LinearEyeDepth(depth);
 
 				float3 rayStart = _WorldSpaceCameraPos;
 				float3 rayEnd = i.wpos;
@@ -245,38 +233,28 @@ Shader "Sandbox/VolumetricLight"
 
 				rayDir /= rayLength;
 
-				float linearDepth = LinearEyeDepth(depth);
 				float projectedDepth = linearDepth / dot(_CameraForward, rayDir);
 				rayLength = min(rayLength, projectedDepth);
 
 				return RayMarch(i.pos.xy, rayStart, rayDir, rayLength);
 			}
 			ENDCG
-		}		
-		// pass 3 - spot light, camera outside
+		}
+
+		// pass 1 - spot light, camera outside
 		Pass
 		{
-			//ZTest Off
-			ZTest[_ZTest]
-			Cull Back
-			ZWrite Off
-			Blend One One
+			ZTest Off Cull Back ZWrite Off Blend One One
 
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment fragSpotOutside
 			#pragma target 4.0
 
-			#define UNITY_HDR_ON
-
 			#pragma shader_feature HEIGHT_FOG
 			#pragma shader_feature SHADOWS_DEPTH
 			#pragma shader_feature NOISE
 			#pragma shader_feature SPOT
-
-			#ifdef SHADOWS_DEPTH
-			#define SHADOWS_NATIVE
-			#endif
 			
 			float _CosAngle;
 			float4 _ConeAxis;
@@ -287,7 +265,6 @@ Shader "Sandbox/VolumetricLight"
 			{
 				float2 uv = i.uv.xy / i.uv.w;
 
-				// read depth and reconstruct world position
 				float depth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, uv);
 
 				float3 rayStart = _WorldSpaceCameraPos;
