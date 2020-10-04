@@ -70,14 +70,10 @@ public class VolumetricLight : MonoBehaviour
         Destroy(_material);
     }
 
-    private void VolumetricLightRenderer_PreRenderEvent(VolumetricLightRenderer renderer, Matrix4x4 viewProj)
+    private void VolumetricLightRenderer_PreRenderEvent(VolumetricLightRenderer renderer, Matrix4x4 VP)
     {
-        // light was destroyed without deregistring, deregister now
         if (_light == null || _light.gameObject == null)
-        {
             VolumetricLightRenderer.PreRenderEvent -= VolumetricLightRenderer_PreRenderEvent;
-        }
-
         if (!_light.gameObject.activeInHierarchy || _light.enabled == false)
             return;
 
@@ -102,11 +98,6 @@ public class VolumetricLight : MonoBehaviour
             _material.DisableKeyword("HEIGHT_FOG");
         }
 
-        SetupSpotLight(renderer, viewProj);
-    }
-
-    private void SetupSpotLight(VolumetricLightRenderer renderer, Matrix4x4 viewProj)
-    {
         _commandBuffer.Clear();
 
         int pass = 1;
@@ -130,7 +121,7 @@ public class VolumetricLight : MonoBehaviour
 
         _material.SetMatrix("_MyLightMatrix0", clip * proj * view);
 
-        _material.SetMatrix("_WorldViewProj", viewProj * world);
+        _material.SetMatrix("_WorldViewProj", VP * world);
 
         _material.SetVector("_LightPos", new Vector4(_light.transform.position.x, _light.transform.position.y, _light.transform.position.z, 1.0f / (_light.range * _light.range)));
         _material.SetVector("_LightColor", _light.color * _light.intensity);
@@ -165,40 +156,29 @@ public class VolumetricLight : MonoBehaviour
             _material.SetTexture("_LightTexture0", _light.cookie);
         }
 
-        bool forceShadowsOff = false;
-        if ((_light.transform.position - Camera.current.transform.position).magnitude >= QualitySettings.shadowDistance)
-            forceShadowsOff = true;
+        clip = Matrix4x4.TRS(new Vector3(0.5f, 0.5f, 0.5f), Quaternion.identity, new Vector3(0.5f, 0.5f, 0.5f));
 
-        if (_light.shadows != LightShadows.None && forceShadowsOff == false)
-        {
-            clip = Matrix4x4.TRS(new Vector3(0.5f, 0.5f, 0.5f), Quaternion.identity, new Vector3(0.5f, 0.5f, 0.5f));
-
-            if (_reversedZ)
-                proj = Matrix4x4.Perspective(_light.spotAngle, 1, _light.range, _light.shadowNearPlane);
-            else
-                proj = Matrix4x4.Perspective(_light.spotAngle, 1, _light.shadowNearPlane, _light.range);
-
-            Matrix4x4 m = clip * proj;
-            m[0, 2] *= -1;
-            m[1, 2] *= -1;
-            m[2, 2] *= -1;
-            m[3, 2] *= -1;
-
-            //view = _light.transform.worldToLocalMatrix;
-            _material.SetMatrix("_MyWorld2Shadow", m * view);
-            _material.SetMatrix("_WorldView", m * view);
-
-            _material.EnableKeyword("SHADOWS_DEPTH");
-            _commandBuffer.SetGlobalTexture("_ShadowMapTexture", BuiltinRenderTextureType.CurrentActive);
-            _commandBuffer.SetRenderTarget(renderer.GetVolumeLightBuffer());
-
-            _commandBuffer.DrawMesh(mesh, world, _material, 0, pass);
-        }
+        if (_reversedZ)
+            proj = Matrix4x4.Perspective(_light.spotAngle, 1, _light.range, _light.shadowNearPlane);
         else
-        {
-            _material.DisableKeyword("SHADOWS_DEPTH");
-            renderer.GlobalCommandBuffer.DrawMesh(mesh, world, _material, 0, pass);
-        }
+            proj = Matrix4x4.Perspective(_light.spotAngle, 1, _light.shadowNearPlane, _light.range);
+
+        Matrix4x4 m = clip * proj;
+        m[0, 2] *= -1;
+        m[1, 2] *= -1;
+        m[2, 2] *= -1;
+        m[3, 2] *= -1;
+
+        //view = _light.transform.worldToLocalMatrix;
+        _material.SetMatrix("_MyWorld2Shadow", m * view);
+        _material.SetMatrix("_WorldView", m * view);
+
+        _material.EnableKeyword("SHADOWS_DEPTH");
+        _commandBuffer.SetGlobalTexture("_ShadowMapTexture", BuiltinRenderTextureType.CurrentActive);
+        _commandBuffer.SetRenderTarget(renderer.GetVolumeLightBuffer());
+
+        _commandBuffer.DrawMesh(mesh, world, _material, 0, pass);
+
     }
 
     private bool IsCameraInSpotLightBounds()

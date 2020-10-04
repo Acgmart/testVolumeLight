@@ -13,7 +13,6 @@ public class VolumetricLightRenderer : MonoBehaviour
     private Camera _camera;
     private CommandBuffer _preLightPass;
 
-    private Matrix4x4 _viewProj;
     private Material _blitAddMaterial;
     private Material _bilateralBlurMaterial;
 
@@ -24,8 +23,6 @@ public class VolumetricLightRenderer : MonoBehaviour
     private Texture3D _noiseTexture;
 
     public Texture DefaultSpotCookie;
-
-    public CommandBuffer GlobalCommandBuffer { get { return _preLightPass; } }
 
     public static Mesh GetSpotLightMesh()
     {
@@ -105,16 +102,15 @@ public class VolumetricLightRenderer : MonoBehaviour
         Matrix4x4 proj = Matrix4x4.Perspective(_camera.fieldOfView, _camera.aspect, 0.01f, _camera.farClipPlane);
 
         proj = GL.GetGPUProjectionMatrix(proj, true);
-        _viewProj = proj * _camera.worldToCameraMatrix;
+        var _viewProj = proj * _camera.worldToCameraMatrix;
 
+        //开局清理一下RT
         _preLightPass.Clear();
-
-        bool dx11 = SystemInfo.graphicsShaderLevel > 40;
-
         _preLightPass.SetRenderTarget(_volumeLightTexture);
         _preLightPass.ClearRenderTarget(false, true, new Color(0, 0, 0, 1));
 
-        UpdateMaterialParameters();
+        Shader.SetGlobalTexture("_DitherTexture", _ditheringTexture);
+        Shader.SetGlobalTexture("_NoiseTexture", _noiseTexture);
 
         PreRenderEvent?.Invoke(this, _viewProj);
     }
@@ -134,12 +130,6 @@ public class VolumetricLightRenderer : MonoBehaviour
         // add volume light buffer to rendered scene
         _blitAddMaterial.SetTexture("_Source", source);
         Graphics.Blit(_volumeLightTexture, destination, _blitAddMaterial, 0);
-    }
-
-    private void UpdateMaterialParameters()
-    {
-        Shader.SetGlobalTexture("_DitherTexture", _ditheringTexture);
-        Shader.SetGlobalTexture("_NoiseTexture", _noiseTexture);
     }
 
     void Update()
