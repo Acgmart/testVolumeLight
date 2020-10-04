@@ -89,7 +89,7 @@ public class VolumetricLight : MonoBehaviour
         _material.SetVector("_MieG", new Vector4(1 - (MieG * MieG), 1 + (MieG * MieG), 2 * MieG, 1.0f / (4.0f * Mathf.PI)));
         _material.SetVector("_VolumetricLight", new Vector4(ScatteringCoef, ExtinctionCoef, _light.range, 1.0f - SkyboxExtinctionCoef));
 
-        _material.SetTexture("_CameraDepthTexture", renderer.GetVolumeLightDepthBuffer());
+        _material.SetTexture("_CameraDepthTexture", null);
         _material.SetFloat("_ZTest", (int)UnityEngine.Rendering.CompareFunction.Always);
 
         if (HeightFog)

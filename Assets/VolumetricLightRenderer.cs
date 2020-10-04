@@ -8,7 +8,6 @@ public class VolumetricLightRenderer : MonoBehaviour
 {
     public static event Action<VolumetricLightRenderer, Matrix4x4> PreRenderEvent;
 
-    private static Mesh _pointLightMesh;
     private static Mesh _spotLightMesh;
 
     private Camera _camera;
@@ -28,11 +27,6 @@ public class VolumetricLightRenderer : MonoBehaviour
 
     public CommandBuffer GlobalCommandBuffer { get { return _preLightPass; } }
 
-    public static Mesh GetPointLightMesh()
-    {
-        return _pointLightMesh;
-    }
-
     public static Mesh GetSpotLightMesh()
     {
         return _spotLightMesh;
@@ -41,11 +35,6 @@ public class VolumetricLightRenderer : MonoBehaviour
     public RenderTexture GetVolumeLightBuffer()
     {
         return _volumeLightTexture;
-    }
-
-    public RenderTexture GetVolumeLightDepthBuffer()
-    {
-        return null;
     }
 
     public static Texture GetDefaultSpotCookie()
@@ -73,13 +62,6 @@ public class VolumetricLightRenderer : MonoBehaviour
         _preLightPass.name = "PreLight";
 
         ChangeResolution();
-
-        if (_pointLightMesh == null)
-        {
-            GameObject go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            _pointLightMesh = go.GetComponent<MeshFilter>().sharedMesh;
-            Destroy(go);
-        }
 
         if (_spotLightMesh == null)
         {
