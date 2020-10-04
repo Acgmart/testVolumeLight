@@ -18,8 +18,6 @@ Shader "Sandbox/VolumetricLight"
 
 		sampler3D _NoiseTexture;
 		sampler2D _DitherTexture;
-		
-		float4 _FrustumCorners[4];
 
 		struct appdata
 		{
@@ -266,26 +264,22 @@ Shader "Sandbox/VolumetricLight"
 				float2 uv = i.uv.xy / i.uv.w;
 
 				float depth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, uv);
+				float linearDepth = LinearEyeDepth(depth);
 
 				float3 rayStart = _WorldSpaceCameraPos;
 				float3 rayEnd = i.wpos;
 
 				float3 rayDir = (rayEnd - rayStart);
 				float rayLength = length(rayDir);
-
 				rayDir /= rayLength;
-
+				float projectedDepth = linearDepth / dot(_CameraForward, rayDir);
 
 				// inside cone
 				float3 r1 = rayEnd + rayDir * 0.001;
-
 				// plane intersection
 				float planeCoord = RayPlaneIntersect(_ConeAxis, _PlaneD, r1, rayDir);
 				// ray cone intersection
 				float2 lineCoords = RayConeIntersect(_ConeApex, _ConeAxis, _CosAngle, r1, rayDir);
-
-				float linearDepth = LinearEyeDepth(depth);
-				float projectedDepth = linearDepth / dot(_CameraForward, rayDir);
 
 				float z = (projectedDepth - rayLength);
 				rayLength = min(planeCoord, min(lineCoords.x, lineCoords.y));
